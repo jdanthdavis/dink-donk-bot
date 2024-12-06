@@ -32,6 +32,15 @@ const santaListCollection = mongoose.createConnection(process.env.MONGO_URI, {
   dbName: 'secret_santa', // Set the specific database
 });
 
+// Add event listeners for connection
+santaListCollection.once('open', () => {
+  console.log('MongoDB connected successfully to the secret_santa database!');
+});
+
+santaListCollection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+});
+
 // Create a model based on the schema
 const Santas = santaListCollection.model('santas', santaSchema, 'santas'); // Specify collection 'times'
 module.exports = Santas;
