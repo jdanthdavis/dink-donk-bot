@@ -19,29 +19,51 @@ client.once(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
-let isBotReady = false; // Flag to track bot readiness
+const deadline = new Date('2024-12-08T23:59:00-05:00'); // 12/08/2024 at 11:59 PM EST
+
+let deadlineReached = false; // Flag to track bot readiness
 
 client.once(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  isBotReady = true; // Set the flag once the bot is ready
 
-  // Initialize cron job after a short delay to avoid immediate execution
-  setTimeout(() => {
-    cron.schedule('*/2 * * * *', runRefreshJob, {
-      timezone: 'America/New_York',
-    });
-  }, 10000); // Adjust delay as needed (e.g., 5 seconds)
+  if (!deadlineReached) {
+    // Initialize cron job after a short delay to avoid immediate execution
+    setTimeout(() => {
+      cron.schedule('*/2 * * * *', sendTimeRemaining, {
+        timezone: 'America/New_York',
+      });
+    }, 10000); // Adjust delay as needed (e.g., 5 seconds)
+  }
 });
 
 client.login(BOT_TOKEN);
 
-const runRefreshJob = () => {
-  // Check if the bot is ready and make sure the cron job isn't executed immediately after the bot starts
-  if (isBotReady) {
-    console.log('CRON SCHEDULE RAN!');
-  } else {
-    console.log('Skipping cron job execution because bot is not ready yet.');
+const sendTimeRemaining = async () => {
+  const currentTime = new Date();
+  const timeDifference = deadline - currentTime; // Time remaining in milliseconds
+
+  if (timeDifference <= 0) {
+    deadlineReached = true;
+    console.log('The deadline has passed.');
+    return;
   }
+
+  // Calculate the remaining time
+  const remainingDays = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+  const remainingHours = Math.floor(
+    (timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+  );
+  const remainingMinutes = Math.floor(
+    (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
+  );
+
+  const remainingMessage = `Time remaining until deadline: ${remainingDays} days, ${remainingHours} hours, and ${remainingMinutes} minutes.`;
+
+  console.log(remainingMessage);
+
+  // Send the message to the specified channel
+  // const channel = await client.channels.fetch(SANTA_CHANNEL);
+  // channel.send(remainingMessage);
 };
 
 client.on('interactionCreate', async (interaction) => {
