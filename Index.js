@@ -15,10 +15,6 @@ const client = new Client({
   partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
 
-client.once(Events.ClientReady, async () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-});
-
 const deadline = new Date('2024-12-08T23:59:00-05:00'); // 12/08/2024 at 11:59 PM EST
 
 let deadlineReached = false; // Flag to track bot readiness
@@ -28,12 +24,11 @@ client.once(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
   if (!deadlineReached) {
-    // Initialize cron job after a short delay to avoid immediate execution
-    setTimeout(() => {
-      cron.schedule('*/2 * * * *', sendTimeRemaining, {
-        timezone: 'America/New_York',
-      });
-    }, 10000); // Adjust delay as needed (e.g., 5 seconds)
+    cron.schedule('0 * * * *', sendTimeRemaining, {
+      timezone: 'America/New_York',
+    });
+  } else {
+    console.log('The deadline has been reached. Not running cron scheduler.');
   }
 });
 
@@ -42,7 +37,7 @@ client.login(BOT_TOKEN);
 const sendTimeRemaining = async () => {
   const currentTime = new Date();
   const timeDifference = deadline - currentTime; // Time remaining in milliseconds
-  const channel = await client.channels.fetch('1248914770833313835');
+  const channel = await client.channels.fetch(SANTA_CHANNEL);
 
   if (timeDifference <= 0) {
     deadlineReached = true;
@@ -59,22 +54,17 @@ const sendTimeRemaining = async () => {
     (timeDifference % (1000 * 60 * 60)) / (1000 * 60)
   );
 
-  const remainingMessage =
-    `content:
-          '# <a:dinkDonk:1303875324660158464> Secret Santa 2024 Is Live! <a:dinkDonk:1303875324660158464>\n## Closing date: 12/08 at 11:59PM EST\nUse the ` /
-    santa` command to join the list!\nWhen we reach the deadline the bot will DM each person their partner.\nGifts can be made/purchased from anywhere. If you get an international partner it may be cheaper to buy something from a company in their country instead of shipping one yourself.\n\n*Note: In the case that there is an uneven amount of santas then a random santa who agreed to do two people will be assigned the extra person.*'\mTime remaining until deadline: ${remainingDays} days, ${remainingHours} hours, and ${remainingMinutes} minutes.`;
+  const remainingMessage = `## Time remaining until deadline: ${remainingDays} days, ${remainingHours} hours, and ${remainingMinutes} minutes.`;
 
-  if (prevMsg) {
-    await prevMsg.edit(remainingMessage);
-  } else {
-    prevMsg = await channel.send(remainingMessage);
+  try {
+    if (prevMsg) {
+      await prevMsg.edit(remainingMessage);
+    } else {
+      prevMsg = await channel.send(remainingMessage);
+    }
+  } catch (error) {
+    console.log('Error updating time. ', error);
   }
-
-  console.log(remainingMessage);
-
-  // Send the message to the specified channel
-  // const channel = await client.channels.fetch(SANTA_CHANNEL);
-  // channel.send(remainingMessage);
 };
 
 client.on('interactionCreate', async (interaction) => {
@@ -97,7 +87,7 @@ client.on('interactionCreate', async (interaction) => {
 
 // Forces the bot to refresh the board.
 client.on('messageCreate', async (message) => {
-  if (message.author.id === CLIENT_ID && message.author !== MY_ID) return;
+  if (message.author.id === CLIENT_ID || message.author.id !== MY_ID) return;
   const channel = await client.channels.fetch(SANTA_CHANNEL);
   const content = message.content.toLowerCase();
 
