@@ -1,5 +1,4 @@
 const { Events, Client, GatewayIntentBits, Partials } = require('discord.js');
-const { getAllSantas } = require('./getAllSantas');
 const { buildSanta } = require('./buildSanta');
 require('dotenv').config();
 
@@ -17,7 +16,6 @@ const client = new Client({
 
 client.once(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  getAllSantas();
 });
 
 client.login(BOT_TOKEN);
