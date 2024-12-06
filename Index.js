@@ -22,6 +22,7 @@ client.once(Events.ClientReady, async () => {
 const deadline = new Date('2024-12-08T23:59:00-05:00'); // 12/08/2024 at 11:59 PM EST
 
 let deadlineReached = false; // Flag to track bot readiness
+let prevMsg = null;
 
 client.once(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -41,6 +42,7 @@ client.login(BOT_TOKEN);
 const sendTimeRemaining = async () => {
   const currentTime = new Date();
   const timeDifference = deadline - currentTime; // Time remaining in milliseconds
+  const channel = await client.channels.fetch('1248914770833313835');
 
   if (timeDifference <= 0) {
     deadlineReached = true;
@@ -58,6 +60,12 @@ const sendTimeRemaining = async () => {
   );
 
   const remainingMessage = `Time remaining until deadline: ${remainingDays} days, ${remainingHours} hours, and ${remainingMinutes} minutes.`;
+
+  if (prevMsg) {
+    await prevMsg.edit(remainingMessage);
+  } else {
+    prevMsg = await channel.send(remainingMessage);
+  }
 
   console.log(remainingMessage);
 
