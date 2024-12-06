@@ -1,5 +1,6 @@
 const { Events, Client, GatewayIntentBits, Partials } = require('discord.js');
 const { buildSanta } = require('./buildSanta');
+const cron = require('node-cron');
 require('dotenv').config();
 
 const { BOT_TOKEN, CLIENT_ID, GUILD_ID, SANTA_CHANNEL, MY_ID } = process.env;
@@ -19,6 +20,15 @@ client.once(Events.ClientReady, async () => {
 });
 
 client.login(BOT_TOKEN);
+
+const runRefreshJob = () => {
+  console.log('CRON SCHEDULE RAN!');
+};
+
+// Runs once a week at 10PM EST
+cron.schedule('*/5 * * * *', runRefreshJob, {
+  timezone: 'America/New_York',
+});
 
 client.on('interactionCreate', async (interaction) => {
   if (interaction.isCommand()) {
