@@ -3,7 +3,7 @@ const { buildSanta } = require('./buildSanta');
 const cron = require('node-cron');
 require('dotenv').config();
 
-const { BOT_TOKEN, CLIENT_ID, GUILD_ID, SANTA_CHANNEL, MY_ID } = process.env;
+const { BOT_TOKEN, CLIENT_ID, SANTA_CHANNEL, MY_ID } = process.env;
 
 const client = new Client({
   intents: [
@@ -25,9 +25,15 @@ const runRefreshJob = () => {
   console.log('CRON SCHEDULE RAN!');
 };
 
-// Runs once a week at 10PM EST
-cron.schedule('*/5 * * * *', runRefreshJob, {
-  timezone: 'America/New_York',
+client.once(Events.ClientReady, async () => {
+  console.log(`Logged in as ${client.user.tag}!`);
+
+  // Delay the cron job to avoid immediate execution on startup
+  setTimeout(() => {
+    cron.schedule('*/2 * * * *', runRefreshJob, {
+      timezone: 'America/New_York',
+    });
+  }, 10000); // Delay by 5 seconds (or adjust as needed)
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -51,7 +57,6 @@ client.on('interactionCreate', async (interaction) => {
 // Forces the bot to refresh the board.
 client.on('messageCreate', async (message) => {
   if (message.author.id === CLIENT_ID && message.author !== MY_ID) return;
-  const { SANTA_CHANNEL } = process.env;
   const channel = await client.channels.fetch(SANTA_CHANNEL);
   const content = message.content.toLowerCase();
 
