@@ -1,7 +1,7 @@
 const { Events, Client, GatewayIntentBits, Partials } = require('discord.js');
 const { buildSanta } = require('./buildSanta');
 const cron = require('node-cron');
-// const assignSantas = require('./assignSantas');
+const assignSantas = require('./assignSantas');
 require('dotenv').config();
 
 const { BOT_TOKEN, CLIENT_ID, SANTA_CHANNEL, MY_ID } = process.env;
@@ -23,7 +23,6 @@ let prevMsg = null;
 
 client.once(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  // assignSantas();
 
   if (!deadlineReached) {
     cron.schedule('0 * * * *', sendTimeRemaining, {
@@ -96,6 +95,29 @@ client.on('messageCreate', async (message) => {
   switch (content) {
     case '.buildsanta':
       buildSanta(channel);
+      return;
+    case '.assignsantas':
+      const assignments = await assignSantas(channel);
+      assignments.forEach(async (x) => {
+        const userToDm = x.santaId;
+        const recipient = x.whoTheySendTo.santaName;
+        const username = await client.users.fetch(userToDm);
+
+        try {
+          const user = await client.users.fetch(userToDm);
+          // Send a DM to the user
+          await user.send(
+            `You've been assigned **${recipient}!**\n**Their shipping info is:** ${x.whoTheySendTo.shippingInfo}\n**Their hobbies/likes are:** ${x.whoTheySendTo.hobbies}\n\n**Note:** When shipping you should not include your name on the sender section on your label!`
+          );
+
+          channel.send({
+            content: `${username} has been assigned a partner!`,
+          });
+          console.log('DM sent successfully');
+        } catch (error) {
+          console.error('ERROR!', error);
+        }
+      });
       return;
     default:
       console.log('Command does not exist.');
