@@ -27,7 +27,7 @@ module.exports = {
     })
     .addStringOption((option) => {
       return option
-        .setName('likes-hobbies')
+        .setName('likes-and-hobbies')
         .setDescription(
           'List your hobbies/likes for gift ideas. Separate each with a comma: Example1, example2, ect.'
         )
@@ -38,7 +38,7 @@ module.exports = {
     const name = interaction.options.getString('name');
     const shippingInfo = interaction.options.getString('shipping-info');
     const multiSanta = interaction.options.getBoolean('multi-person-santa');
-    const hobbies = interaction.options.getString('likes-hobbies');
+    const hobbies = interaction.options.getString('likes-and-hobbies');
     const channel = interaction.guild.channels.cache.get(SANTA_CHANNEL);
 
     try {
