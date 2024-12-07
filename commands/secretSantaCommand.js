@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const Santas = require('../models/secretSantaSchema');
+const { Santas } = require('../models/secretSantaSchema');
 require('dotenv').config();
 const { SANTA_CHANNEL } = process.env;
 
