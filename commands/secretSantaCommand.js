@@ -35,6 +35,7 @@ module.exports = {
     }),
 
   async execute(interaction) {
+    const authorId = interaction.user.id;
     const name = interaction.options.getString('name');
     const shippingInfo = interaction.options.getString('shipping-info');
     const multiSanta = interaction.options.getBoolean('multi-person-santa');
@@ -45,6 +46,7 @@ module.exports = {
       // Insert the data into MongoDB
       const newSanta = {
         santaInfo: {
+          discordId: authorId,
           santaName: name,
           shippingInfo: shippingInfo,
           multiSanta: multiSanta,

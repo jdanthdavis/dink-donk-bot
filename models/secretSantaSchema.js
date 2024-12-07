@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const santaInfoSchema = new Schema({
+  discordId: {
+    type: String,
+    required: true,
+  },
   santaName: {
     type: String,
     required: true, // Assuming the name is mandatory
@@ -42,5 +46,13 @@ santaListCollection.on('error', (err) => {
 });
 
 // Create a model based on the schema
-const Santas = santaListCollection.model('santas', santaSchema, 'santas'); // Specify collection 'times'
-module.exports = Santas;
+const Santas = santaListCollection.model('santas', santaSchema, 'santas');
+const devSantas = santaListCollection.model(
+  'dev_santas',
+  santaSchema,
+  'dev_santas'
+);
+module.exports = {
+  Santas,
+  devSantas,
+};

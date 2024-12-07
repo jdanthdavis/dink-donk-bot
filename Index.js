@@ -1,6 +1,7 @@
 const { Events, Client, GatewayIntentBits, Partials } = require('discord.js');
 const { buildSanta } = require('./buildSanta');
 const cron = require('node-cron');
+// const assignSantas = require('./assignSantas');
 require('dotenv').config();
 
 const { BOT_TOKEN, CLIENT_ID, SANTA_CHANNEL, MY_ID } = process.env;
@@ -22,6 +23,7 @@ let prevMsg = null;
 
 client.once(Events.ClientReady, async () => {
   console.log(`Logged in as ${client.user.tag}!`);
+  // assignSantas();
 
   if (!deadlineReached) {
     cron.schedule('0 * * * *', sendTimeRemaining, {
